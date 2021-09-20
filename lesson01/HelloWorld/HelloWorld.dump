@@ -1,0 +1,33 @@
+
+HelloWorld:	file format Mach-O 64-bit x86-64
+
+
+Disassembly of section __TEXT,__text:
+
+0000000100003f5d _main:
+100003f5d: 55                          	pushq	%rbp
+100003f5e: 48 89 e5                    	movq	%rsp, %rbp
+100003f61: 48 83 ec 10                 	subq	$16, %rsp
+100003f65: 89 7d fc                    	movl	%edi, -4(%rbp)
+100003f68: 48 89 75 f0                 	movq	%rsi, -16(%rbp)
+100003f6c: 48 8d 05 2f 00 00 00        	leaq	47(%rip), %rax
+100003f73: 48 89 c7                    	movq	%rax, %rdi
+100003f76: e8 07 00 00 00              	callq	7 <dyld_stub_binder+0x100003f82>
+100003f7b: b8 00 00 00 00              	movl	$0, %eax
+100003f80: c9                          	leave
+100003f81: c3                          	retq
+
+Disassembly of section __TEXT,__stubs:
+
+0000000100003f82 __stubs:
+100003f82: ff 25 78 40 00 00           	jmpq	*16504(%rip)
+
+Disassembly of section __TEXT,__stub_helper:
+
+0000000100003f88 __stub_helper:
+100003f88: 4c 8d 1d 79 40 00 00        	leaq	16505(%rip), %r11
+100003f8f: 41 53                       	pushq	%r11
+100003f91: ff 25 69 00 00 00           	jmpq	*105(%rip)
+100003f97: 90                          	nop
+100003f98: 68 00 00 00 00              	pushq	$0
+100003f9d: e9 e6 ff ff ff              	jmp	-26 <__stub_helper>
