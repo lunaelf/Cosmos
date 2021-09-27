@@ -4,10 +4,14 @@
 
 ```
 menuentry 'HelloOS' {
-    insmod part_msdos
+    insmod part_gpt
     insmod ext2
-    set root='hd0,msdos2' # 注意 boot 目录挂载的分区
-    multiboot2 /boot/HelloOS.bin
+    set root='hd0,gpt2' # 注意 boot 目录挂载的分区，这是我机器上的情况
+    multiboot2 /HelloOS.bin
     boot
 }
 ```
+
+## 参考资料
+
+[操作系统实战：实验环境搭建、热门问题解答](https://blog.csdn.net/damiaomiao666/article/details/116914684)
