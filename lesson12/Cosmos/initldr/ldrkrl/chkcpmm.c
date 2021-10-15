@@ -110,17 +110,20 @@ void init_mem(machbstart_t *mbsp)
     {
         kerror("no e820map\n");
     }
+    // 根据 e820map_t 结构数据检查内存大小
     if (chk_memsize(retemp, retemnr, 0x100000, 0x8000000) == NULL)
     {
         kerror("Your computer is low on memory, the memory cannot be less than 128MB!");
     }
-    mbsp->mb_e820padr = (u64_t)((u32_t)(retemp));
-    mbsp->mb_e820nr = (u64_t)retemnr;
-    mbsp->mb_e820sz = retemnr * (sizeof(e820map_t));
-    mbsp->mb_memsz = get_memsize(retemp, retemnr);
+    mbsp->mb_e820padr = (u64_t)((u32_t)(retemp)); // 把 e820map_t 结构数据的首地址传给 mbsp->mb_e820padr
+    mbsp->mb_e820nr = (u64_t)retemnr; // 把 e820map_t 结构数组元素个数传给 mbsp->mb_e820nr
+    mbsp->mb_e820sz = retemnr * (sizeof(e820map_t)); // 把 e820map_t 结构数组大小传给 mbsp->mb_e820sz
+    mbsp->mb_memsz = get_memsize(retemp, retemnr); // 根据 e820map_t 结构数据计算内存大小
     init_acpi(mbsp);
     return;
 }
+
+// 检查 CPU 主函数
 void init_chkcpu(machbstart_t *mbsp)
 {
     if (!chk_cpuid())
@@ -134,50 +137,59 @@ void init_chkcpu(machbstart_t *mbsp)
         kerror("Your CPU is not support 64bits mode sys is die!");
         CLI_HALT();
     }
-    mbsp->mb_cpumode = 0x40;
+    mbsp->mb_cpumode = 0x40; // 如果成功则设置及其信息结构的 CPU 模式为 64 位
     return;
 }
+
+// 初始化内核栈
 void init_krlinitstack(machbstart_t *mbsp)
 {
     if (1 > move_krlimg(mbsp, (u64_t)(0x8f000), 0x1001))
     {
         kerror("iks_moveimg err");
     }
-    mbsp->mb_krlinitstack = IKSTACK_PHYADR;
-    mbsp->mb_krlitstacksz = IKSTACK_SIZE;
+    mbsp->mb_krlinitstack = IKSTACK_PHYADR; // 栈顶地址
+    mbsp->mb_krlitstacksz = IKSTACK_SIZE; // 栈大小是 4 KB
     return;
 }
 
 void init_bstartpages(machbstart_t *mbsp)
 {
-    u64_t *p = (u64_t *)(KINITPAGE_PHYADR);
+    // 顶级页目录
+    u64_t *p = (u64_t *)(KINITPAGE_PHYADR); // 16 MB 地址处
+    // 页目录指针
     u64_t *pdpte = (u64_t *)(KINITPAGE_PHYADR + 0x1000);
+    // 页目录
     u64_t *pde = (u64_t *)(KINITPAGE_PHYADR + 0x2000);
-
+    // 物理地址从 0 开始
     u64_t adr = 0;
-    
+
     if (1 > move_krlimg(mbsp, (u64_t)(KINITPAGE_PHYADR), (0x1000 * 16 + 0x2000)))
     {
         kerror("move_krlimg err");
     }
-    
+    // 将顶级页目录、页目录指针的空间清 0
     for (uint_t mi = 0; mi < PGENTY_SIZE; mi++)
     {
         p[mi] = 0;
         pdpte[mi] = 0;
     }
+    // 映射
     for (uint_t pdei = 0; pdei < 16; pdei++)
     {
         pdpte[pdei] = (u64_t)((u32_t)pde | KPDPTE_RW | KPDPTE_P);
         for (uint_t pdeii = 0; pdeii < PGENTY_SIZE; pdeii++)
         {
+            // 大页 KPDE_PS 2 MB，可读写 KPDE_RW，存在 KPDE_P
             pde[pdeii] = 0 | adr | KPDE_PS | KPDE_RW | KPDE_P;
             adr += 0x200000;
         }
         pde = (u64_t *)((u32_t)pde + 0x1000);
     }
+    // 让顶级页目录中第 0 项和第 ((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff 项，指向同一个页目录指针页
     p[((KRNL_VIRTUAL_ADDRESS_START) >> KPML4_SHIFT) & 0x1ff] = (u64_t)((u32_t)pdpte | KPML4_RW | KPML4_P);
     p[0] = (u64_t)((u32_t)pdpte | KPML4_RW | KPML4_P);
+    // 把页表首地址保存在机器信息结构中
     mbsp->mb_pml4padr = (u64_t)(KINITPAGE_PHYADR);
     mbsp->mb_subpageslen = (u64_t)(0x1000 * 16 + 0x2000);
     mbsp->mb_kpmapphymemsz = (u64_t)(0x400000000);
@@ -246,6 +258,7 @@ u64_t get_memsize(e820map_t *e8p, u32_t enr)
     return len;
 }
 
+// 通过改写 Eflags 寄存器的第 21 位，观察其位的变化判断是否支持 CPUID
 int chk_cpuid()
 {
     int rets = 0;
@@ -270,18 +283,19 @@ int chk_cpuid()
     return rets;
 }
 
+// 检查 CPU 是否支持长模式
 int chk_cpu_longmode()
 {
     int rets = 0;
     __asm__ __volatile__(
         "movl $0x80000000,%%eax \n\t"
-        "cpuid \n\t"
-        "cmpl $0x80000001,%%eax \n\t"
-        "setnb %%al \n\t"
+        "cpuid \n\t" // 把 eax 中放入 0x80000000 调用 CPUID 指令
+        "cmpl $0x80000001,%%eax \n\t" // 看 eax 中返回结果
+        "setnb %%al \n\t" // 不为 0x80000001，则不支持 0x80000001 号功能
         "jb 1f \n\t"
         "movl $0x80000001,%%eax \n\t"
-        "cpuid \n\t"
-        "bt $29,%%edx  \n\t" // long mode  support 位
+        "cpuid \n\t" // 把 eax 中放入 0x80000001 调用 CPUID 指令，检查 edx 中的返回数据
+        "bt $29,%%edx  \n\t" // 长模式 支持位 是否为 1
         "setcb %%al \n\t"
         "1: \n\t"
         "movzx %%al,%%eax \n\t"
@@ -297,8 +311,6 @@ void init_chkmm()
     e820map_t *map = (e820map_t *)EMAP_PTR;
     u16_t *map_nr = (u16_t *)EMAP_NR_PTR;
     u64_t mmsz = 0;
-
-
 
     for (int j = 0; j < (*map_nr); j++)
     {
@@ -383,13 +395,12 @@ void init_bstartpagesold(machbstart_t *mbsp)
 
 void ldr_createpage_and_open()
 {
-    pt64_t *pml4p = (pt64_t *)PML4T_BADR, *pdptp = (pt64_t *)PDPTE_BADR, *pdep = (pt64_t *)PDE_BADR; 
+    pt64_t *pml4p = (pt64_t *)PML4T_BADR, *pdptp = (pt64_t *)PDPTE_BADR, *pdep = (pt64_t *)PDE_BADR;
     for (int pi = 0; pi < PG_SIZE; pi++)
     {
         pml4p[pi] = 0;
         pdptp[pi] = 0;
         pdep[pi] = 0;
-    
     }
 
     pml4p[0] = 0 | PDPTE_BADR | PDT_S_RW | PDT_S_PNT;
