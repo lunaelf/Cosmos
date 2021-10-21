@@ -7,8 +7,8 @@
 #include "cosmosmctrl.h"
 
 const char *cosmos_version = "Cosmos\n内核版本:00.01\n彭东 @ 构建于 "__DATE__
-                           " "__TIME__
-                           "\n";
+                             " "__TIME__
+                             "\n";
 
 PUBLIC LKINIT void init_dftgraph()
 {
@@ -184,13 +184,18 @@ PUBLIC LKINIT void init_bdvideo()
 {
     dftgraph_t *kghp = &kdftgh;
 
+    // 初始化图形数据结构，里面放有图形模式，分辨率，图形驱动函数指针
     init_dftgraph();
+    // 初始 bga 图形显卡的函数指针
     init_bga();
+    // 初始 vbe 图形显卡的函数指针
     init_vbe();
+    // 清空屏幕为黑色
     fill_graph(kghp, BGRA(0, 0, 0));
+    // 显示背景图片
     set_charsdxwflush(0, 0);
     hal_background();
-    
+
     return;
 }
 
@@ -268,6 +273,8 @@ void drxw_pixcolor(dftgraph_t *kghp, u32_t x, u32_t y, pixl_t pix)
     kghp->gh_opfun.dgo_dxwritepix(kghp, pix, x, y);
     return;
 }
+
+// 刷新显存
 void flush_videoram(dftgraph_t *kghp)
 {
     kghp->gh_opfun.dgo_flush(kghp);
@@ -615,7 +622,7 @@ void bga_writepix(void *ghpdev, pixl_t pix, uint_t x, uint_t y)
         u64_t p24adr = (x + (y * kghp->gh_x)) * 3;
         p24bas = (u8_t *)((uint_t)(p24adr + kghp->gh_fvrmphyadr));
         p24bas[0] = (u8_t)(pix);
-        p24bas[1] = (u8_t)(pix >> 8);  
+        p24bas[1] = (u8_t)(pix >> 8);
         p24bas[2] = (u8_t)(pix >> 16);
         return;
     }
@@ -630,13 +637,13 @@ pixl_t bga_dxreadpix(void *ghpdev, uint_t x, uint_t y)
 void bga_dxwritepix(void *ghpdev, pixl_t pix, uint_t x, uint_t y)
 {
     dftgraph_t *kghp = (dftgraph_t *)ghpdev;
-    u8_t *p24bas; 
+    u8_t *p24bas;
     if (kghp->gh_onepixbits == 24)
     {
         u64_t p24adr = (x + (y * kghp->gh_x)) * 3 * kghp->gh_curdipbnk;
         p24bas = (u8_t *)((uint_t)(p24adr + kghp->gh_framphyadr));
         p24bas[0] = (u8_t)(pix);
-        p24bas[1] = (u8_t)(pix >> 8); 
+        p24bas[1] = (u8_t)(pix >> 8);
         p24bas[2] = (u8_t)(pix >> 16);
         return;
     }
@@ -654,7 +661,7 @@ sint_t bga_set_xy(void *ghpdev, uint_t x, uint_t y)
 }
 sint_t bga_set_vwh(void *ghpdev, uint_t vwt, uint_t vhi)
 {
-   
+
     bga_write_reg(VBE_DISPI_INDEX_VIRT_WIDTH, (u16_t)vwt);
     bga_write_reg(VBE_DISPI_INDEX_VIRT_HEIGHT, (u16_t)vhi);
     return 0;

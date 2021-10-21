@@ -18,21 +18,19 @@
 
 #define MAPF_SZ_BIT 0
 #define MAPF_ACSZ_BIT 4
-#define MAPF_SZ_16KB (1<<MAPF_SZ_BIT)
-#define MAPF_SZ_32KB (2<<MAPF_SZ_BIT)
-#define MAPF_SZ_4MB (8<<MAPF_SZ_BIT)
+#define MAPF_SZ_16KB (1 << MAPF_SZ_BIT)
+#define MAPF_SZ_32KB (2 << MAPF_SZ_BIT)
+#define MAPF_SZ_4MB (8 << MAPF_SZ_BIT)
 
-
-
-#define MAPF_ACSZ_128KB (1<<MAPF_ACSZ_BIT)
-#define MAPF_ACSZ_256KB (2<<MAPF_ACSZ_BIT)
-#define MAPF_ACSZ_512KB (3<<MAPF_ACSZ_BIT)
-#define MAPF_ACSZ_1MB (4<<MAPF_ACSZ_BIT)
-#define MAPF_ACSZ_2MB (5<<MAPF_ACSZ_BIT)
-#define MAPF_ACSZ_4MB (6<<MAPF_ACSZ_BIT)
+#define MAPF_ACSZ_128KB (1 << MAPF_ACSZ_BIT)
+#define MAPF_ACSZ_256KB (2 << MAPF_ACSZ_BIT)
+#define MAPF_ACSZ_512KB (3 << MAPF_ACSZ_BIT)
+#define MAPF_ACSZ_1MB (4 << MAPF_ACSZ_BIT)
+#define MAPF_ACSZ_2MB (5 << MAPF_ACSZ_BIT)
+#define MAPF_ACSZ_4MB (6 << MAPF_ACSZ_BIT)
 
 #define MAPONE_SIZE (0x400000)
-#define MAP_FLAGES_VAL(RV,SALLOCSZ,MSZ) (RV|SALLOCSZ|MSZ)
+#define MAP_FLAGES_VAL(RV, SALLOCSZ, MSZ) (RV | SALLOCSZ | MSZ)
 
 #define ADDT_EMTP_FLG 1
 #define ADDT_FUEM_FLG 2
@@ -63,13 +61,13 @@
 
 #define ETYBAK_ADR 0x2000
 #define PM32_EIP_OFF (ETYBAK_ADR)
-#define PM32_ESP_OFF (ETYBAK_ADR+4)
-#define RM16_EIP_OFF (ETYBAK_ADR+8)
-#define RM16_ESP_OFF (ETYBAK_ADR+12)
+#define PM32_ESP_OFF (ETYBAK_ADR + 4)
+#define RM16_EIP_OFF (ETYBAK_ADR + 8)
+#define RM16_ESP_OFF (ETYBAK_ADR + 12)
 
-#define RWHDPACK_ADR (ETYBAK_ADR+32)
-#define E80MAP_NR (ETYBAK_ADR+64)
-#define E80MAP_ADRADR (ETYBAK_ADR+68)
+#define RWHDPACK_ADR (ETYBAK_ADR + 32)
+#define E80MAP_NR (ETYBAK_ADR + 64)
+#define E80MAP_ADRADR (ETYBAK_ADR + 68)
 #define E80MAP_ADR (0x5000)
 
 #define E820MAPBASS E80MAP_ADR
@@ -89,30 +87,28 @@
 #define PMR_T_HWUSERRAM 8
 #define PMR_T_ARACONRAM 0xf
 #define PMR_T_BUGRAM 0xff
-#define PMR_F_X86_32 (1<<0)
-#define PMR_F_X86_64 (1<<1)
-#define PMR_F_ARM_32 (1<<2)
-#define PMR_F_ARM_64 (1<<3)
+#define PMR_F_X86_32 (1 << 0)
+#define PMR_F_X86_64 (1 << 1)
+#define PMR_F_ARM_32 (1 << 2)
+#define PMR_F_ARM_64 (1 << 3)
 #define PMR_F_HAL_MASK 0xff
-
 
 typedef struct s_PHYMMARGE
 {
-    spinlock_t pmr_lock;
-    u32_t pmr_type;
+    spinlock_t pmr_lock; // 保护这个结构是自旋锁
+    u32_t pmr_type;      // 内存地址空间类型
     u32_t pmr_stype;
-    u32_t pmr_dtype;
-    u32_t pmr_flgs;
+    u32_t pmr_dtype; // 内存地址空间的子类型，见上面的宏
+    u32_t pmr_flgs;  // 结构的标志与状态
     u32_t pmr_stus;
-    u64_t pmr_saddr;
-    u64_t pmr_lsize;
-    u64_t pmr_end;
-    u64_t pmr_rrvmsaddr;
-    u64_t pmr_rrvmend;
-    void* pmr_prip;
-    void* pmr_extp;
-}phymmarge_t;
-
+    u64_t pmr_saddr;     // 内存空间的开始地址
+    u64_t pmr_lsize;     // 内存空间的大小
+    u64_t pmr_end;       // 内存空间的结束地址
+    u64_t pmr_rrvmsaddr; // 内存保留空间的开始地址
+    u64_t pmr_rrvmend;   // 内存保留空间的结束地址
+    void *pmr_prip;      // 结构的私有数据指针，以后扩展所用
+    void *pmr_extp;      // 结构的扩展数据指针，以后扩展所用
+} phymmarge_t;
 
 typedef struct s_PHYADRSPCE
 {
@@ -120,30 +116,30 @@ typedef struct s_PHYADRSPCE
     u32_t ap_devtype;
     adr_t ap_adrstart;
     adr_t ap_adrend;
-}phyadrspce_t;
+} phyadrspce_t;
 
 typedef struct s_MMAPDSC
 {
     list_h_t map_list;
     spinlock_t map_lock;
-    adr_t     map_phyadr;
-    adr_t     map_phyadrend;
-    u32_t     map_allcount;
-    u32_t     map_flg;
+    adr_t map_phyadr;
+    adr_t map_phyadrend;
+    u32_t map_allcount;
+    u32_t map_flg;
     /*它管理4MB大小的内存块，在实际分配时，它所描述的4MB
      *可以被分割成128KB，256KB，512KB，1MB，2MB，4MB，只能
      *分成同一大小的等份，不支持内存共享了，嵌入式os不需要*/
-}mmapdsc_t;
+} mmapdsc_t;
 typedef struct s_ALCFRELST
 {
     spinlock_t afl_lock;
-    size_t     afl_sz;
-    list_h_t   afl_fulllsth;
-    list_h_t   afl_emtplsth;
-    list_h_t   afl_fuemlsth;
+    size_t afl_sz;
+    list_h_t afl_fulllsth;
+    list_h_t afl_emtplsth;
+    list_h_t afl_fuemlsth;
     /*用于挂载同一种大小的mmapdsc队列，比如分割成128KB大小的
      *并对其分类，分配完的、分配一部分的、未分配的。*/
-}alcfrelst_t;
+} alcfrelst_t;
 typedef struct s_PHYMEM
 {
     list_h_t pmm_list;
@@ -153,8 +149,7 @@ typedef struct s_PHYMEM
     alcfrelst_t pmm_sz_lsth[BLKSZ_HEAD_MAX];
     /*alcfrelst数组，形成了128KB到4MB大小队列数组 [0]128KB 
      *[1]256KB [2]512KB [3]1MB [4]2MB [5]4MB*/
-}phymem_t;
+} phymem_t;
 #endif
-
 
 #endif // HALINIT_H

@@ -20,38 +20,37 @@ typedef unsigned long adr_t;
 
 typedef sint_t bool_t;
 typedef u32_t dev_t;
-typedef const char* str_t;
+typedef const char *str_t;
 typedef char char_t;
 typedef unsigned long drv_t;
 typedef unsigned long mrv_t;
 typedef sint_t drvstus_t;
 typedef sint_t sysstus_t;
 typedef sint_t hand_t;
-typedef void* buf_t;
+typedef void *buf_t;
 typedef unsigned long size_t;
 typedef u32_t reg_t;
 
-
 typedef void (*inthandler_t)();
 typedef drv_t (*i_handle_t)(uint_t int_nr);
-typedef drv_t (*f_handle_t)(uint_t int_nr,void* sframe);
-typedef drvstus_t (*intflthandle_t)(uint_t ift_nr,void* device,void* sframe);
+typedef drv_t (*f_handle_t)(uint_t int_nr, void *sframe);
+typedef drvstus_t (*intflthandle_t)(uint_t ift_nr, void *device, void *sframe); // 中断处理函数的指针类型
 typedef u64_t mmstus_t;
 
 #define KLINE static inline
 #define PUBLIC
-#define private	static
+#define private static
 #define EXTERN extern
 #define KEXTERN extern
-#define NULL	0
-#define TRUE    1
-#define	FALSE	0
+#define NULL 0
+#define TRUE 1
+#define FALSE 0
 #define DFCERRSTUS (-1)
 #define DFCOKSTUS (0)
 #define NO_HAND (-1)
-#define ALIGN(x, a)     (((x) + (a) - 1) & ~((a) - 1))
+#define ALIGN(x, a) (((x) + (a)-1) & ~((a)-1))
 
 #define LKHEAD_T __attribute__((section(".head.text")))
 #define LKHEAD_D __attribute__((section(".head.data")))
-#define LKINIT 
+#define LKINIT
 #endif

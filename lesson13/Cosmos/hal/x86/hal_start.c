@@ -8,7 +8,9 @@
 
 void hal_start()
 {
-    init_hal();
+    // 第一步：初始化 hal 层
+    init_hal(); // 其中会调用初始化平台函数，在那里会调用初始化图形驱动
+    // 第二步：初始化内核层
     init_krl();
     return;
 }

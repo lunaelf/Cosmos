@@ -132,6 +132,7 @@ u64_t initpmrge_core(e820map_t *e8sp, u64_t e8nr, phymmarge_t *pmargesp)
     }
     for (u64_t i = 0; i < e8nr; i++)
     {
+        // 根据一个 e820map_t 结构建立一个 phymmarge_t 结构
         if (init_one_pmrge(&e8sp[i], &pmargesp[i]) == FALSE)
         {
             return retnr;
@@ -146,6 +147,7 @@ void init_phymmarge()
     machbstart_t *mbsp = &kmachbsp;
     phymmarge_t *pmarge_adr = NULL;
     u64_t pmrgesz = 0;
+    // 根据 machbstart_t 机器信息结构计算获得 phymmarge_t 结构的开始地址和大小
     ret_phymmarge_adrandsz(mbsp, &pmarge_adr, &pmrgesz);
     if (NULL == pmarge_adr || 0 == pmrgesz)
     {
@@ -159,6 +161,7 @@ void init_phymmarge()
         return;
     }
     e820map_t *e8p = (e820map_t *)((adr_t)(mbsp->mb_e820padr));
+    // 建立 phymmarge_t 结构
     u64_t ipmgnr = initpmrge_core(e8p, mbsp->mb_e820nr, pmarge_adr);
     if (ipmgnr == 0)
     {
@@ -170,10 +173,12 @@ void init_phymmarge()
         system_error("init_phymmarge->ipmgnr*sizeof(phymmarge_t))!=pmrgesz\n");
         return;
     }
+    // 把 phymmarge_t 结构的地址大小个数保存 machbstart_t 机器信息结构中
     mbsp->mb_e820expadr = tmppmrphyadr;
     mbsp->mb_e820exnr = ipmgnr;
     mbsp->mb_e820exsz = ipmgnr * sizeof(phymmarge_t);
     mbsp->mb_nextwtpadr = PAGE_ALIGN(mbsp->mb_e820expadr + mbsp->mb_e820exsz);
+    // phymmarge_t 结构中的地址空间从低到高排序
     phymmarge_sort(pmarge_adr, ipmgnr);
     return;
 }

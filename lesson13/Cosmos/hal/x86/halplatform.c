@@ -29,6 +29,7 @@ adr_t phyadr_to_viradr(adr_t kphyadr)
 
 void machbstart_t_init(machbstart_t *initp)
 {
+    // 清零
     memset(initp, 0, sizeof(machbstart_t));
     return;
 }
@@ -36,15 +37,19 @@ void machbstart_t_init(machbstart_t *initp)
 void init_machbstart()
 {
     machbstart_t *kmbsp = &kmachbsp;
-    machbstart_t *smbsp = MBSPADR;
+    machbstart_t *smbsp = MBSPADR; // 物理地址 1MB 处
     machbstart_t_init(kmbsp);
+    // 复制，要把地址转换成虚拟地址
     memcopy((void *)phyadr_to_viradr((adr_t)smbsp), (void *)kmbsp, sizeof(machbstart_t));
     return;
 }
 
+// 平台初始化函数
 void init_halplaltform()
 {
+    // 复制机器信息结构
     init_machbstart();
+    // 初始化图形显示驱动
     init_bdvideo();
     return;
 }

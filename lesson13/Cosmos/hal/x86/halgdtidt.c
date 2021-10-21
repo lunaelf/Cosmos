@@ -116,13 +116,12 @@ PUBLIC LKINIT void init_descriptor()
         set_descriptor(&x64_gdt[gdtindx][0], 0, 0, 0);
         set_descriptor(&x64_gdt[gdtindx][1], 0, 0, DA_CR | DA_64 | 0);
         set_descriptor(&x64_gdt[gdtindx][2], 0, 0, DA_DRW | DA_64 | 0);
-        set_descriptor(&x64_gdt[gdtindx][3], 0, 0, DA_CR | DA_64 | DA_DPL3 | 0); 
+        set_descriptor(&x64_gdt[gdtindx][3], 0, 0, DA_CR | DA_64 | DA_DPL3 | 0);
         set_descriptor(&x64_gdt[gdtindx][4], 0, 0, DA_DRW | DA_64 | DA_DPL3 | 0);
         set_x64tss_descriptor(&x64_gdt[gdtindx][6], (u64_t)&x64tss[gdtindx], sizeof(x64tss[gdtindx]) - 1, DA_386TSS);
 
         x64_igdt_reg[gdtindx].gdtbass = (u64_t)x64_gdt[gdtindx];
         x64_igdt_reg[gdtindx].gdtLen = sizeof(x64_gdt[gdtindx]) - 1;
-
     }
 
     load_x64_gdt(&x64_igdt_reg[0]);
@@ -133,6 +132,7 @@ PUBLIC LKINIT void init_descriptor()
 
 PUBLIC LKINIT void init_idt_descriptor()
 {
+    // 一开始把所有中断的处理程序设置为保留的通用处理程序
     for (u16_t intindx = 0; intindx <= 255; intindx++)
     {
         set_idt_desc((u8_t)intindx, DA_386IGate, hxi_exc_general_intpfault, PRIVILEGE_KRNL);
@@ -247,4 +247,3 @@ PUBLIC LKINIT void init_idt_descriptor()
     load_x64_idt(&x64_iidt_reg);
     return;
 }
-
